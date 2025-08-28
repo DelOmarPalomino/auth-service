@@ -1,0 +1,67 @@
+/* dependencies {
+    implementation project(':model')
+
+    // Lombok solamente en compileOnly/annotationProcessor (sin slf4j)
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+    testCompileOnly 'org.projectlombok:lombok:1.18.32'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
+    testRuntimeOnly  'org.junit.jupiter:junit-jupiter-engine:5.10.3'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.12.0'
+    testImplementation 'io.projectreactor:reactor-test:3.7.8'
+}
+test { useJUnitPlatform() } */
+
+
+dependencies {
+    implementation project(':model')
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:1.18.38"
+    annotationProcessor "org.projectlombok:lombok:1.18.38"
+    testCompileOnly "org.projectlombok:lombok:1.18.38"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.38"
+
+    // ===== JUnit 5: BOM SOLO de Jupiter =====
+    testImplementation platform("org.junit:junit-bom:5.10.3")
+    testImplementation "org.junit.jupiter:junit-jupiter"        // API + params
+    testRuntimeOnly  "org.junit.jupiter:junit-jupiter-engine"   // engine
+
+    // NO declares junit-platform-launcher (lo pone Gradle) ❌
+    // NO declares junit-platform-bom en ningún módulo ❌
+
+    // Alineamos explícitamente el "engine" y "commons" de Platform al 1.10.3
+    constraints {
+        testRuntimeOnly("org.junit.platform:junit-platform-engine:1.10.3")
+        testRuntimeOnly("org.junit.platform:junit-platform-commons:1.10.3")
+    }
+
+    // Test libs
+    testImplementation "io.projectreactor:reactor-test:3.7.8"
+    testImplementation "org.mockito:mockito-junit-jupiter:5.12.0"
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "failed", "skipped"
+        exceptionFormat "full"
+        showCauses true
+        showStackTraces true
+    }
+}
+
+// Cinturón y tirantes: si algo trae otras versiones, las forzamos en config de test
+configurations.matching { it.name.toLowerCase().contains('test') }.all {
+    resolutionStrategy.force(
+        "org.junit.jupiter:junit-jupiter-api:5.10.3",
+        "org.junit.jupiter:junit-jupiter-engine:5.10.3",
+        "org.junit.platform:junit-platform-engine:1.10.3",
+        "org.junit.platform:junit-platform-commons:1.10.3"
+    )
+}
+
+
